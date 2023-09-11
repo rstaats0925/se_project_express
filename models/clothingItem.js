@@ -17,8 +17,10 @@ const clothingItemSchema = new mongoose.Schema({
     required: true,
     type: String,
     validate: {
-      validator: (v) => validator.isURL(v),
-      message: "Invalid Link",
+      validator (v) {
+        return validator.isURL(value);
+      },
+      message: "You must enter a valid URL",
     }
   },
   owner: {
@@ -36,3 +38,4 @@ const clothingItemSchema = new mongoose.Schema({
   },
 });
 
+module.exports = mongoose.model('clothingItem', clothingItemSchema);
