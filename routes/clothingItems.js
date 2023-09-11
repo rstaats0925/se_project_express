@@ -21,3 +21,5 @@ router.delete('/items', (req, res) => {
     .then(user => {res.send({data: user})})
     .catch(() => { res.status(500).send({message: "Error"}) })
 });
+
+module.exports = router;

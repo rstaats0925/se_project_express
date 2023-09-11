@@ -25,3 +25,5 @@ router.post('/users', (req, res) => {
   const { name, avatar } = req.body;
   User.create({name, avatar});
 })
+
+module.exports = router;
