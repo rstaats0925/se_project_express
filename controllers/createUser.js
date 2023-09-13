@@ -5,7 +5,7 @@ function createUser (req, res) {
 
   User.create({ name, avatar })
     .then(user => {
-      res.send({data: user});
+      res.status(201).send({data: user});
     })
     .catch(err => {
       res.status(500).send({message: "error"});
