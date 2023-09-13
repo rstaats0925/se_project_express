@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const createUser = require('../controllers/createUser');
+const {createUser} = require('../controllers/createUser');
 
 router.get('/', (req, res) => {
   res.send("Received a GET request at /users");
