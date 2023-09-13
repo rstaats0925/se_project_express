@@ -12,8 +12,6 @@ router.get('/:id', (req, res) => {
   res.send(`recieved a GET request for user id: ${id}`);
 })
 
-router.post('/', (req, res) => {
-  createUser(req, res);
-})
+router.post('/', createUser);
 
 module.exports = router;
