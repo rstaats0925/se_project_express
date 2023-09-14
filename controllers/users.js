@@ -16,4 +16,28 @@ function createUser (req, res) {
     })
 }
 
-module.exports = {createUser};
+function getUsers (req, res) {
+  User.find({})
+    .then(users => {
+      res.status(200).send(users);
+    })
+    .catch(err => {
+      res.status(500).send({message: "error from getUsers", err})
+    })
+}
+
+function getUser(req, res) {
+  User.findById(req.params.id)
+    .then(user => {
+      res.status(200).send(user);
+    })
+    .catch(err => {
+      res.status(500).send({message: "error from getUser", err});
+    })
+}
+
+module.exports = {
+  createUser,
+  getUsers,
+  getUser
+};
