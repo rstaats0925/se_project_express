@@ -1,4 +1,4 @@
-const { NOT_FOUND, BAD_REQUEST, INTERNAL_SERVER_ERROR } = require('../utils/errors');
+const { NOT_FOUND, BAD_REQUEST, INTERNAL_SERVER_ERROR } = require("./errors");
 
 function handleUserHttpError (req, res, err) {
   console.error(err);
@@ -22,13 +22,13 @@ function handleItemHttpError (req, res, err) {
   console.error(err);
   switch(err.name) {
     case "DocumentNotFoundError":
-      res.status(NOT_FOUND).send({messsage: `item id ${req.params.itemId} couldn't be found`, err})
+      res.status(NOT_FOUND).send({messsage: `item id ${req.params.itemId} couldn't be found`, err});
       break;
     case "CastError":
-      res.status(BAD_REQUEST).send({message: "id is incorrect format", err})
+      res.status(BAD_REQUEST).send({message: "id is incorrect format", err});
       break;
     default:
-      res.status(INTERNAL_SERVER_ERROR).send({message: "An error has occurred on the server", err})
+      res.status(INTERNAL_SERVER_ERROR).send({message: "An error has occurred on the server", err});
       break;
   }
 }
