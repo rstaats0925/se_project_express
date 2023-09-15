@@ -1,12 +1,14 @@
 const ClothingItem = require('../models/clothingItem');
+const { NOT_FOUND, BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, CREATED } = require('../utils/errors');
+const { handleItemHttpError } = require('../utils/errorHandlers');
 
 function getItems (req, res) {
   ClothingItem.find({})
     .then(items => {
-      res.status(200).send(items)
+      res.status(OK).send(items)
     })
     .catch(err => {
-      res.status(500).send({message: "error in getItems", err})
+      res.status(INTERNAL_SERVER_ERROR).send({message: "error in getItems", err})
     })
 }
 
@@ -16,34 +18,54 @@ function createItem (req, res) {
 
   ClothingItem.create({ name, weather, imageUrl, owner})
     .then(item => {
-      res.status(201).send({data:item});
+      res.status(CREATED).send({data:item});
     })
-    .catch(err => {res.status(500).send({message: "error in createItem", err})})
+    .catch(err => {res.status(INTERNAL_SERVER_ERROR).send({message: "error in createItem", err})})
 }
 
 function deleteItem (req, res) {
-  ClothingItem.findByIdAndRemove(req.params.id)
+  ClothingItem.findByIdAndRemove(req.params.itemId)
     .orFail()
     .then(item => {
-      res.status(200).send(item);
+      res.status(OK).send(item);
     })
     .catch(err => {
-      switch(err.name) {
-        case "DocumentNotFoundError":
-          res.status(404).send({messsage: `user id ${req.params.id} couldn't be found`, err})
-          break;
-        case "CastError":
-          res.status(400).send({message: "id is incorrect format", err})
-          break;
-        default:
-          res.status(500).send({message: "An error has occurred on the server", err})
-          break;
-      }
+      handleItemHttpError(req, res, err);
+    })
+}
+
+function likeItem (req, res) {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true })
+    .orFail()
+    .then(like => {
+      res.status(OK).send(like);
+    })
+    .catch(err => {
+      handleItemHttpError(req, res, err);
+    })
+}
+
+function dislikeItem (req, res) {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true })
+    .orFail()
+    .then(dislike => {
+      res.status(200).send(dislike);
+    })
+    .catch(err => {
+      handleItemHttpError(req, res, err);
     })
 }
 
 module.exports = {
   getItems,
   createItem,
-  deleteItem
+  deleteItem,
+  likeItem,
+  dislikeItem
 }
