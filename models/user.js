@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
+
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -10,6 +12,12 @@ const userSchema = new mongoose.Schema({
   avatar: {
     required: true,
     type: String,
+    validate: {
+      validator (v) {
+        return validator.isURL(v);
+      },
+      message: "You must enter a valid URL",
+    }
   }
 });
 

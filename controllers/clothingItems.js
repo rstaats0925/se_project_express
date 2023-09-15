@@ -1,5 +1,5 @@
 const ClothingItem = require('../models/clothingItem');
-const { NOT_FOUND, BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, CREATED } = require('../utils/errors');
+const { OK, CREATED } = require('../utils/errors');
 const { handleItemHttpError } = require('../utils/errorHandlers');
 
 function getItems (req, res) {
@@ -8,7 +8,7 @@ function getItems (req, res) {
       res.status(OK).send(items)
     })
     .catch(err => {
-      res.status(INTERNAL_SERVER_ERROR).send({message: "error in getItems", err})
+      handleItemHttpError(req, res, err);
     })
 }
 
@@ -20,7 +20,9 @@ function createItem (req, res) {
     .then(item => {
       res.status(CREATED).send({data:item});
     })
-    .catch(err => {res.status(INTERNAL_SERVER_ERROR).send({message: "error in createItem", err})})
+    .catch(err => {
+      handleItemHttpError(req, res, err);
+    })
 }
 
 function deleteItem (req, res) {
@@ -55,7 +57,7 @@ function dislikeItem (req, res) {
     { new: true })
     .orFail()
     .then(dislike => {
-      res.status(200).send(dislike);
+      res.status(OK).send(dislike);
     })
     .catch(err => {
       handleItemHttpError(req, res, err);
