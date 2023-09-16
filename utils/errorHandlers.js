@@ -4,7 +4,7 @@ function handleUserHttpError (req, res, err) {
   console.error(err);
   switch(err.name) {
     case "DocumentNotFoundError":
-      res.status(NOT_FOUND).send({messsage: `user id ${req.params.id} couldn't be found`, err});
+      res.status(NOT_FOUND).send({message: `user id ${req.params.id} couldn't be found`, err});
       break;
     case "CastError":
       res.status(BAD_REQUEST).send({message: "id is incorrect format", err});
@@ -22,7 +22,7 @@ function handleItemHttpError (req, res, err) {
   console.error(err);
   switch(err.name) {
     case "DocumentNotFoundError":
-      res.status(NOT_FOUND).send({messsage: `item id ${req.params.itemId} couldn't be found`, err});
+      res.status(NOT_FOUND).send({message: `item id ${req.params.itemId} couldn't be found`, err});
       break;
     case "CastError":
       res.status(BAD_REQUEST).send({message: "id is incorrect format", err});
