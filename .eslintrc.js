@@ -7,8 +7,7 @@ module.exports = {
     "extends": [
         "eslint:recommended",
         "airbnb-base",
-        "prettier",
-        "plugin:react/recommended"
+        "prettier"
     ],
     "overrides": [
         {
@@ -27,9 +26,7 @@ module.exports = {
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
-    "plugins": [
-        "react"
-    ],
+    "plugins": [],
     "rules": {
       "no-underscore-dangle": "off"
     }
