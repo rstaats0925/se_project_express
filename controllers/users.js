@@ -1,17 +1,35 @@
 const User = require('../models/user');
-const { OK } = require('../utils/errors');
+const bcrypt = require('bcryptjs');
+const { OK, UNAUTHORIZED, INTERNAL_SERVER_ERROR, CREATED, CONFLICT } = require('../utils/errors');
 const { handleUserHttpError } = require('../utils/errorHandlers');
 
+function login (req, res) {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password);
+}
 
 function createUser (req, res) {
-  const {name, avatar} = req.body;
+  const {name, avatar, email, password} = req.body;
 
-  User.create({ name, avatar })
+  User.findOne({ email })
     .then(user => {
-      res.send({data: user});
+      if (user) {
+        return Promise.reject(new Error("a user with that email already exists"));
+      }
+
+      bcrypt.hash(password, 10)
+        .then(hash => {
+          User.create({ name, avatar, email, password:hash })
+            .then(user => {
+              res.status(CREATED).send({ data: user });
+            })
+            .catch(err => {
+              handleUserHttpError(req, res, err);
+            })
+        })
     })
     .catch(err => {
-      handleUserHttpError(req, res, err);
+      res.status(CONFLICT).send({ message: "Email is already in use" });
     })
 }
 
