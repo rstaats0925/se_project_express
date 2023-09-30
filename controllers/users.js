@@ -68,9 +68,14 @@ function getUser(req, res) {
     })
 }
 
+function getCurrentUser (req, res) {
+  
+}
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
-  login
+  login,
+  getCurrentUser
 };
