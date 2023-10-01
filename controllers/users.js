@@ -1,7 +1,7 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { OK, UNAUTHORIZED, INTERNAL_SERVER_ERROR, CREATED, CONFLICT } = require('../utils/errors');
+const { OK, UNAUTHORIZED, CREATED, CONFLICT } = require('../utils/errors');
 const { handleUserHttpError } = require('../utils/errorHandlers');
 const { JWT_SECRET } = require('../utils/config');
 
@@ -79,10 +79,21 @@ function getCurrentUser (req, res) {
     })
 }
 
+function updateProfile (req, res) {
+  User.findOneAndUpdate(req.user._id , req.body, {new: true, runValidators: true})
+    .orFail()
+    .then(user => {
+      res.status(OK).send({ user });
+    })
+    .catch(err => {
+      handleUserHttpError(req, res, err);
+    })
+}
 module.exports = {
   createUser,
   getUsers,
   getUser,
   login,
-  getCurrentUser
+  getCurrentUser,
+  updateProfile
 };

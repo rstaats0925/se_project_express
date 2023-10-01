@@ -1,5 +1,5 @@
 const ClothingItem = require('../models/clothingItem');
-const { OK, CREATED } = require('../utils/errors');
+const { OK, CREATED, UNAUTHORIZED } = require('../utils/errors');
 const { handleItemHttpError } = require('../utils/errorHandlers');
 
 function getItems (req, res) {
@@ -26,10 +26,15 @@ function createItem (req, res) {
 }
 
 function deleteItem (req, res) {
-  ClothingItem.findByIdAndRemove(req.params.itemId)
+  ClothingItem.findById(req.params.itemId)
     .orFail()
     .then(item => {
-      res.status(OK).send(item);
+      if (item.owner === req.user._id) {
+        item.deleteOne();
+      }
+      else {
+        return Promise.reject(new Error("Unauthorized").status(UNAUTHORIZED));
+      }
     })
     .catch(err => {
       handleItemHttpError(req, res, err);
