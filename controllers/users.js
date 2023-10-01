@@ -18,7 +18,7 @@ function login (req, res) {
       res.send({ token });
     })
     .catch(err => {
-      res.status(UNAUTHORIZED).send({ err: err.message });
+      res.status(UNAUTHORIZED).send({ message: err.message });
     })
 }
 
@@ -28,7 +28,7 @@ function createUser (req, res) {
   User.findOne({ email })
     .then(user => {
       if (user) {
-        return Promise.reject(new Error("a user with that email already exists"));
+        return Promise.reject(new Error("a user with that email already exists").status(409));
       }
 
       bcrypt.hash(password, 10)
@@ -43,7 +43,7 @@ function createUser (req, res) {
         })
     })
     .catch(err => {
-      res.status(CONFLICT).send({ message: "Email is already in use" });
+      res.status(CONFLICT).send({ message: "email is already in use" });
     })
 }
 

@@ -4,16 +4,16 @@ function handleUserHttpError (req, res, err) {
   console.error(err);
   switch(err.name) {
     case "DocumentNotFoundError":
-      res.status(NOT_FOUND).send({message: `user id ${req.params.id} couldn't be found`});
+      res.status(NOT_FOUND).send({message: err.message});
       break;
     case "CastError":
-      res.status(BAD_REQUEST).send({message: "id is incorrect format"});
+      res.status(BAD_REQUEST).send({message: err.message});
       break;
     case "ValidationError":
-      res.status(BAD_REQUEST).send({message:"id is incorrect format or information is missing"});
+      res.status(BAD_REQUEST).send({message: err.message});
       break;
     default:
-      res.status(INTERNAL_SERVER_ERROR).send({message: `An ${err.name} error has occurred on the server`});
+      res.status(INTERNAL_SERVER_ERROR).send({message: err.message});
       break;
   }
 }
