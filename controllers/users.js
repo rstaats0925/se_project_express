@@ -69,7 +69,14 @@ function getUser(req, res) {
 }
 
 function getCurrentUser (req, res) {
-  
+  User.findById(req.user._id)
+    .orFail()
+    .then(user => {
+      res.status(OK).send(user);
+    })
+    .catch(err => {
+      handleUserHttpError(req, res, err);
+    })
 }
 
 module.exports = {
