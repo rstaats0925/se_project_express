@@ -25,10 +25,18 @@ function login (req, res) {
 function createUser (req, res) {
   const {name, avatar, email, password} = req.body;
 
+  if (!email) {
+    res.status(400).send({message: "Please include an email"});
+    return;
+  }
+
   User.findOne({ email })
     .then(user => {
       if (user) {
-        return Promise.reject(new Error("a user with that email already exists").status(409));
+        const error = new Error("a user with that email already exists.")
+        error.statusCode = 409;
+        return Promise.reject(error);
+        // return Promise.reject(new Error("a user with that email already exists").status(409));
       }
 
       bcrypt.hash(password, 10)
@@ -43,7 +51,9 @@ function createUser (req, res) {
         })
     })
     .catch(err => {
-      res.status(CONFLICT).send({ message: "email is already in use" });
+      console.error(err);
+      res.status(err.statusCode || 500).send({message: err.message || "Internal server error"});
+      // res.status(CONFLICT).send({ message: "email is already in use" });
     })
 }
 
