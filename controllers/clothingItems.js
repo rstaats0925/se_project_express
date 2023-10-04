@@ -29,11 +29,16 @@ function deleteItem (req, res) {
   ClothingItem.findById(req.params.itemId)
     .orFail()
     .then(item => {
+      console.log(item);
       if (item.owner === req.user._id) {
         item.deleteOne();
+        return;
       }
       else {
-        return Promise.reject(new Error("Unauthorized").status(UNAUTHORIZED));
+        const error = new Error();
+        error.status = UNAUTHORIZED;
+        error.name = "Unauthorized";
+        return Promise.reject(error);
       }
     })
     .catch(err => {
