@@ -43,7 +43,7 @@ function createUser (req, res) {
         .then(hash => {
           User.create({ name, avatar, email, password:hash })
             .then(user => {
-              res.status(CREATED).send({ data: user });
+              res.status(CREATED).send({ name: user.name, email: user.email, avatar: user.avatar });
             })
             .catch(err => {
               handleUserHttpError(req, res, err);
