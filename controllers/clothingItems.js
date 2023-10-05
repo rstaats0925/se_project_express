@@ -30,15 +30,18 @@ function deleteItem (req, res) {
     .orFail()
     .then(item => {
       console.log(item);
-      if (item.owner === req.user._id) {
+      if (item.owner.equals(req.user._id)) {
         item.deleteOne();
+        res.send(item);
         return;
       }
       else {
         const error = new Error();
-        error.status = UNAUTHORIZED;
-        error.name = "Unauthorized";
-        return Promise.reject(error);
+        error.status = 403;
+        error.name = "Forbidden";
+        error.message = "Can only delete own cards";
+        throw error;
+        // return Promise.reject(error);
       }
     })
     .catch(err => {
