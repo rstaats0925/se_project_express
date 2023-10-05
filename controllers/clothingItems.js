@@ -1,5 +1,5 @@
 const ClothingItem = require('../models/clothingItem');
-const { OK, CREATED, UNAUTHORIZED } = require('../utils/errors');
+const { OK, CREATED, FORBIDDEN } = require('../utils/errors');
 const { handleItemHttpError } = require('../utils/errorHandlers');
 
 function getItems (req, res) {
@@ -31,18 +31,15 @@ function deleteItem (req, res) {
     .then(item => {
       console.log(item);
       if (item.owner.equals(req.user._id)) {
-        item.deleteOne();
-        res.send(item);
-        return;
+        return item.deleteOne()
+          .then(() => res.send({ item }));
       }
-      else {
-        const error = new Error();
-        error.status = 403;
-        error.name = "Forbidden";
-        error.message = "Can only delete own cards";
-        throw error;
-        // return Promise.reject(error);
-      }
+
+      const error = new Error();
+      error.status = FORBIDDEN;
+      error.name = "Forbidden";
+      error.message = "Can only delete own cards";
+      throw error;
     })
     .catch(err => {
       handleItemHttpError(req, res, err);

@@ -1,7 +1,7 @@
-const User = require('../models/user');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { OK, UNAUTHORIZED, CREATED, CONFLICT } = require('../utils/errors');
+const bcrypt = require('bcryptjs');
+const User = require('../models/user');
+const { OK, UNAUTHORIZED, CREATED, CONFLICT, BAD_REQUEST, INTERNAL_SERVER_ERROR } = require('../utils/errors');
 const { handleUserHttpError } = require('../utils/errorHandlers');
 const { JWT_SECRET } = require('../utils/config');
 
@@ -26,7 +26,7 @@ function createUser (req, res) {
   const {name, avatar, email, password} = req.body;
 
   if (!email) {
-    res.status(400).send({message: "Please include an email"});
+    res.status(BAD_REQUEST).send({message: "Please include an email"});
     return;
   }
 
@@ -34,16 +34,15 @@ function createUser (req, res) {
     .then(user => {
       if (user) {
         const error = new Error("a user with that email already exists.")
-        error.statusCode = 409;
+        error.statusCode = CONFLICT;
         return Promise.reject(error);
-        // return Promise.reject(new Error("a user with that email already exists").status(409));
       }
 
       bcrypt.hash(password, 10)
         .then(hash => {
           User.create({ name, avatar, email, password:hash })
-            .then(user => {
-              res.status(CREATED).send({ name: user.name, email: user.email, avatar: user.avatar });
+            .then(newUser => {
+              res.status(CREATED).send({ name: newUser.name, email: newUser.email, avatar: newUser.avatar });
             })
             .catch(err => {
               handleUserHttpError(req, res, err);
@@ -52,29 +51,7 @@ function createUser (req, res) {
     })
     .catch(err => {
       console.error(err);
-      res.status(err.statusCode || 500).send({message: err.message || "Internal server error"});
-      // res.status(CONFLICT).send({ message: "email is already in use" });
-    })
-}
-
-function getUsers (req, res) {
-  User.find({})
-    .then(users => {
-      res.status(OK).send(users);
-    })
-    .catch(err => {
-      handleUserHttpError(req, res, err);
-    })
-}
-
-function getUser(req, res) {
-  User.findById(req.params.id)
-    .orFail()
-    .then(user => {
-      res.status(OK).send(user);
-    })
-    .catch(err => {
-      handleUserHttpError(req, res, err);
+      res.status(err.statusCode || INTERNAL_SERVER_ERROR).send({message: err.message || "Internal server error"});
     })
 }
 
@@ -90,7 +67,7 @@ function getCurrentUser (req, res) {
 }
 
 function updateProfile (req, res) {
-  User.findOneAndUpdate(req.user._id , req.body, {new: true, runValidators: true})
+  User.findOneAndUpdate({ _id: req.user._id } , { name: req.user.name, avatar: req.user.avatar }, { new: true, runValidators: true })
     .orFail()
     .then(user => {
       res.status(OK).send({ user });
@@ -101,8 +78,6 @@ function updateProfile (req, res) {
 }
 module.exports = {
   createUser,
-  getUsers,
-  getUser,
   login,
   getCurrentUser,
   updateProfile
