@@ -15,7 +15,7 @@ function login (req, res) {
 
       const token = jwt.sign({_id: user._id}, JWT_SECRET, {expiresIn: '7d'});
 
-      res.send({ token });
+      return res.send({ token });
     })
     .catch(err => {
       res.status(UNAUTHORIZED).send({ message: err.message });
@@ -38,7 +38,7 @@ function createUser (req, res) {
         return Promise.reject(error);
       }
 
-      bcrypt.hash(password, 10)
+      return bcrypt.hash(password, 10)
         .then(hash => {
           User.create({ name, avatar, email, password:hash })
             .then(newUser => {
@@ -67,7 +67,7 @@ function getCurrentUser (req, res) {
 }
 
 function updateProfile (req, res) {
-  User.findOneAndUpdate({ _id: req.user._id } , { name: req.user.name, avatar: req.user.avatar }, { new: true, runValidators: true })
+  User.findOneAndUpdate({ _id: req.user._id } , { name: req.body.name, avatar: req.body.avatar }, { new: true, runValidators: true })
     .orFail()
     .then(user => {
       res.status(OK).send({ user });
