@@ -29,7 +29,6 @@ function deleteItem (req, res) {
   ClothingItem.findById(req.params.itemId)
     .orFail()
     .then(item => {
-      console.log(item);
       if (item.owner.equals(req.user._id)) {
         return item.deleteOne()
           .then(() => res.send({ item }));
