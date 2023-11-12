@@ -1,37 +1,32 @@
-const ClothingItem = require('../models/clothingItem');
-const { OK, CREATED, FORBIDDEN } = require('../utils/errors');
-const { handleItemHttpError } = require('../utils/errorHandlers');
+const ClothingItem = require("../models/clothingItem");
+const { OK, CREATED, FORBIDDEN } = require("../utils/errors");
+const { handleItemHttpError } = require("../utils/errorHandlers");
 
-function getItems (req, res) {
+function getItems(req, res, next) {
   ClothingItem.find({})
-    .then(items => {
-      res.status(OK).send(items)
+    .then((items) => {
+      res.status(OK).send(items);
     })
-    .catch(err => {
-      handleItemHttpError(req, res, err);
-    })
+    .catch(next);
 }
 
-function createItem (req, res) {
+function createItem(req, res, next) {
   const { name, weather, imageUrl } = req.body;
-  const owner = req.user._id
+  const owner = req.user._id;
 
-  ClothingItem.create({ name, weather, imageUrl, owner})
-    .then(item => {
-      res.status(CREATED).send({data:item});
+  ClothingItem.create({ name, weather, imageUrl, owner })
+    .then((item) => {
+      res.status(CREATED).send({ data: item });
     })
-    .catch(err => {
-      handleItemHttpError(req, res, err);
-    })
+    .catch(next);
 }
 
-function deleteItem (req, res) {
+function deleteItem(req, res, next) {
   ClothingItem.findById(req.params.itemId)
     .orFail()
-    .then(item => {
+    .then((item) => {
       if (item.owner.equals(req.user._id)) {
-        return item.deleteOne()
-          .then(() => res.send({ item }));
+        return item.deleteOne().then(() => res.send({ item }));
       }
 
       const error = new Error();
@@ -40,37 +35,33 @@ function deleteItem (req, res) {
       error.message = "Can only delete own cards";
       throw error;
     })
-    .catch(err => {
-      handleItemHttpError(req, res, err);
-    })
+    .catch(next);
 }
 
-function likeItem (req, res) {
+function likeItem(req, res, next) {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
-    { new: true })
+    { new: true },
+  )
     .orFail()
-    .then(like => {
+    .then((like) => {
       res.status(OK).send(like);
     })
-    .catch(err => {
-      handleItemHttpError(req, res, err);
-    })
+    .catch(next);
 }
 
-function dislikeItem (req, res) {
+function dislikeItem(req, res, next) {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
-    { new: true })
+    { new: true },
+  )
     .orFail()
-    .then(dislike => {
+    .then((dislike) => {
       res.status(OK).send(dislike);
     })
-    .catch(err => {
-      handleItemHttpError(req, res, err);
-    })
+    .catch(next);
 }
 
 module.exports = {
@@ -78,5 +69,5 @@ module.exports = {
   createItem,
   deleteItem,
   likeItem,
-  dislikeItem
-}
+  dislikeItem,
+};
