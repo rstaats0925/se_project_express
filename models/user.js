@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
-
+const mongoose = require("mongoose");
+const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const { UnauthorizedError } = require("../utils/errors");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -14,11 +14,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     type: String,
     validate: {
-      validator (v) {
+      validator(v) {
         return validator.isURL(v);
       },
       message: "You must enter a valid URL",
-    }
+    },
   },
   email: {
     type: String,
@@ -28,32 +28,36 @@ const userSchema = new mongoose.Schema({
       validator(v) {
         return validator.isEmail(v);
       },
-      message: "email is invalid or already exists"
-    }
+      message: "email is invalid or already exists",
+    },
   },
   password: {
     type: String,
     required: true,
-    select: false
-  }
+    select: false,
+  },
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).select("+password")
-    .then(user => {
+  return this.findOne({ email })
+    .select("+password")
+    .then((user) => {
       if (!user) {
-        return Promise.reject(new Error("Username or password are incorrect"));
+        return Promise.reject(
+          new UnauthorizedError("Username or password are incorrect"),
+        );
       }
 
-      return bcrypt.compare(password, user.password)
-        .then(matched => {
-          if (!matched) {
-            return Promise.reject(new Error("Username or password are incorrect"));
-          }
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(
+            new UnauthorizedError("Username or password are incorrect"),
+          );
+        }
 
-          return user;
-        })
-    })
-}
+        return user;
+      });
+    });
+};
 
-module.exports = mongoose.model('user', userSchema);
+module.exports = mongoose.model("user", userSchema);

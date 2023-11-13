@@ -18,9 +18,7 @@ function login(req, res, next) {
   User.findUserByCredentials(email, password)
     .then((user) => {
       if (!user) {
-        return Promise.reject(
-          new NotFoundError("incorrect username or password"),
-        );
+        throw new NotFoundError("incorrect username or password");
       }
 
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
