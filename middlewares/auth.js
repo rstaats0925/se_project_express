@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../utils/config");
+// const { JWT_SECRET } = require("../utils/config");
+const JWT_SECRET =
+  NODE_ENV === "production" ? process.env.JWT_SECRET : "Javascript2023";
 const { UNAUTHORIZED } = require("../utils/errors");
 
 function authorize(req, res, next) {
