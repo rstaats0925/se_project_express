@@ -12,6 +12,12 @@ const {
 router.use("/users", authorize, user);
 router.use("/items", clothingItem);
 
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
 router.post("/signin", validateLogin, login);
 router.post("/signup", validateUserBody, createUser);
 router.use((req, res) => {
