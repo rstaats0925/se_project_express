@@ -1,6 +1,7 @@
 const ClothingItem = require("../models/clothingItem");
-const { OK, CREATED, FORBIDDEN } = require("../utils/errors");
-const { handleItemHttpError } = require("../utils/errorHandlers");
+const { NotFoundError } = require("../utils/NotFoundError.js");
+const { ForbiddenError } = require("../utils/ForbiddenError.js");
+const { OK, CREATED } = require("../utils/errors");
 
 function getItems(req, res, next) {
   ClothingItem.find({})
@@ -18,22 +19,24 @@ function createItem(req, res, next) {
     .then((item) => {
       res.status(CREATED).send({ data: item });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("invalid data"));
+      } else {
+        next(err);
+      }
+    });
 }
 
 function deleteItem(req, res, next) {
   ClothingItem.findById(req.params.itemId)
-    .orFail()
+    .orFail(() => new NotFoundError("Not found error"))
     .then((item) => {
       if (item.owner.equals(req.user._id)) {
         return item.deleteOne().then(() => res.send({ item }));
       }
 
-      const error = new Error();
-      error.status = FORBIDDEN;
-      error.name = "Forbidden";
-      error.message = "Can only delete own cards";
-      throw error;
+      throw new ForbiddenError("Can only delete own items");
     })
     .catch(next);
 }
@@ -44,7 +47,7 @@ function likeItem(req, res, next) {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail()
+    .orFail(() => new NotFoundError("Not found error"))
     .then((like) => {
       res.status(OK).send(like);
     })
@@ -57,7 +60,7 @@ function dislikeItem(req, res, next) {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail()
+    .orFail(() => new NotFoundError("Not found error"))
     .then((dislike) => {
       res.status(OK).send(dislike);
     })

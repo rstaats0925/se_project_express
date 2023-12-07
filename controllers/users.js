@@ -1,16 +1,10 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
-const {
-  OK,
-  UnauthorizedError,
-  CREATED,
-  ConflictError,
-  BadRequestError,
-  NotFoundError,
-  INTERNAL_SERVER_ERROR,
-} = require("../utils/errors");
-const { handleUserHttpError } = require("../utils/errorHandlers");
+const { NotFoundError } = require("../utils/NotFoundError.js");
+const { BadRequestError } = require("../utils/BadRequestError.js");
+const { ConflictError } = require("../utils/ConflictError.js");
+const { OK, CREATED } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
 function login(req, res, next) {
@@ -33,13 +27,6 @@ function login(req, res, next) {
 function createUser(req, res, next) {
   const { name, avatar, email, password } = req.body;
 
-  if (!email) {
-    // res.status(BAD_REQUEST).send({ message: "Please include an email" });
-    const err = new BadRequestError("Please include an email");
-    res.status(err.status).send(err);
-    return;
-  }
-
   User.findOne({ email })
     .then((user) => {
       if (user) {
@@ -58,7 +45,13 @@ function createUser(req, res, next) {
               avatar: newUser.avatar,
             });
           })
-          .catch(next);
+          .catch((err) => {
+            if (err.name === "ValidationError") {
+              next(new BadRequestError("invalid data"));
+            } else {
+              next(err);
+            }
+          });
       });
     })
     .catch(next);
@@ -66,7 +59,7 @@ function createUser(req, res, next) {
 
 function getCurrentUser(req, res, next) {
   User.findById(req.user._id)
-    .orFail()
+    .orFail(() => new NotFoundError("Not found error"))
     .then((user) => {
       res.status(OK).send(user);
     })
@@ -79,11 +72,17 @@ function updateProfile(req, res, next) {
     { name: req.body.name, avatar: req.body.avatar },
     { new: true, runValidators: true },
   )
-    .orFail()
+    .orFail(() => new NotFoundError("Not found error"))
     .then((user) => {
       res.status(OK).send({ user });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("invalid data"));
+      } else {
+        next(err);
+      }
+    });
 }
 module.exports = {
   createUser,
