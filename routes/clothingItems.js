@@ -7,10 +7,7 @@ const {
   dislikeItem,
 } = require("../controllers/clothingItems");
 const { authorize } = require("../middlewares/auth");
-const {
-  validateCardBody,
-  validateId,
-} = require("../middlewares/validation.js");
+const { validateCardBody, validateId } = require("../middlewares/validation");
 
 router.get("/", getItems);
 

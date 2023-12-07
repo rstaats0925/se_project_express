@@ -7,7 +7,7 @@ const { authorize } = require("../middlewares/auth");
 const {
   validateUserBody,
   validateLogin,
-} = require("../middlewares/validation.js");
+} = require("../middlewares/validation");
 
 router.use("/users", authorize, user);
 router.use("/items", clothingItem);
@@ -20,7 +20,7 @@ router.get("/crash-test", () => {
 
 router.post("/signin", validateLogin, login);
 router.post("/signup", validateUserBody, createUser);
-router.use((req, res) => {
+router.use(() => {
   // res.status(NOT_FOUND).send({ message: "router not found" });
   throw new NotFoundError("Router not found");
 });
