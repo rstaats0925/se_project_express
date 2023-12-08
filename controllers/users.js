@@ -5,7 +5,12 @@ const { NotFoundError } = require("../utils/NotFoundError");
 const { BadRequestError } = require("../utils/BadRequestError");
 const { ConflictError } = require("../utils/ConflictError");
 const { OK, CREATED } = require("../utils/errors");
-const { JWT_SECRET } = require("../utils/config");
+// const { JWT_SECRET } = require("../utils/config");
+
+const JWT_SECRET =
+  process.env.NODE_ENV === "production"
+    ? process.env.JWT_SECRET
+    : "Javascript2023";
 
 function login(req, res, next) {
   const { email, password } = req.body;

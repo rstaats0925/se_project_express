@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 // const { JWT_SECRET } = require("../utils/config");
+const { UnauthorizedError } = require("../utils/UnauthorizedError");
 const JWT_SECRET =
   process.env.NODE_ENV === "production"
     ? process.env.JWT_SECRET
@@ -11,10 +12,11 @@ function authorize(req, res, next) {
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
     console.log(req.headers);
-    res
-      .status(UNAUTHORIZED)
-      .send({ message: "Authorization required at startswithBearer" });
-    return;
+    // res
+    //   .status(UNAUTHORIZED)
+    //   .send({ message: "Authorization required at startswithBearer" });
+    throw new UnauthorizedError("Authorization required");
+    // return;
   }
 
   const token = authorization.replace("Bearer ", "");
@@ -23,7 +25,7 @@ function authorize(req, res, next) {
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    next(err);
+    next(new UnauthorizedError("Unauthorized error"));
     return;
   }
 
